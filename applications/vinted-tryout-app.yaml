@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vinted-tryout-app
+  namespace: argocd # Important: Argo CD Application resources are typically managed in the argocd namespace
+spec:
+  project: default # Assign to the 'default' project unless you've created others
+
+  source:
+    repoURL: https://github.com/mariusmatonis/vinted-tryout-infra-demo.git # Your infrastructure repository
+    targetRevision: HEAD # Or 'main' to track the main branch
+    path: kubernetes # The path within vinted-tryout-infra-demo where your deployment.yaml lives
+
+  destination:
+    server: https://kubernetes.default.svc # The API server for the cluster where your app should run
+    namespace: default # The namespace in that cluster where your app will be deployed
+
+  syncPolicy:
+    automated: # Enables automated synchronization
+      prune: true # Delete resources that are no longer in Git
+      selfHeal: true # Revert out-of-band changes to match Git
+    syncOptions:
+      - CreateNamespace=true # Automatically create the destination namespace if it doesn't exist
+      # - Replace=true # Optional: Use 'kubectl replace' instead of 'kubectl apply' (use with caution)
+      # - ApplyOutOfSyncOnly=true # Optional: Only apply resources that are OutOfSync
+      # - ServerSideApply=true # Optional: Use server-side apply (recommended for newer K8s versions)
